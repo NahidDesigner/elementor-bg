@@ -1,10 +1,10 @@
 
-import React, { useState, useMemo } from 'react';
-import { BackgroundGenerator } from './components/BackgroundGenerator';
-import { Header } from './components/Header';
-import { Footer } from './components/Footer';
+import React from 'react';
+import { BackgroundGenerator } from './components/BackgroundGenerator.tsx';
+import { Header } from './components/Header.tsx';
+import { Footer } from './components/Footer.tsx';
 
-const App: React.FC = () => {
+const App = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
