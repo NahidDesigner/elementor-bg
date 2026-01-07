@@ -61,7 +61,9 @@ export const VariationCard: React.FC<Props> = ({ name, css, pColor, sColor }) =>
         <div className="mt-auto pt-4 border-t border-slate-50 flex flex-col gap-3">
            <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Advanced > Custom CSS</span>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                Advanced {'->'} Custom CSS
+              </span>
            </div>
            <code className="text-[10px] text-slate-400 font-mono block overflow-hidden text-ellipsis whitespace-nowrap bg-slate-50 px-3 py-2 rounded-xl group-hover:text-indigo-600 transition-colors">
             {css.trim()}
