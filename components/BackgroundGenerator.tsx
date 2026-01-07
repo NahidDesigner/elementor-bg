@@ -30,6 +30,37 @@ export const BackgroundGenerator: React.FC = () => {
     { id: '1', posX: 50, posY: 30, spread: 80, intensity: 60 }
   ]);
   const [toast, setToast] = useState<{msg: string, type: 'success' | 'error'} | null>(null);
+  
+  // Initial presets - converted to state so they can be edited
+  const [presets, setPresets] = useState([
+    { name: "Aurora Borealis", css: "background: linear-gradient(215deg, var(--p) 0%, var(--s) 100%);" },
+    { name: "Deep Space", css: "background: radial-gradient(circle at top left, var(--s), transparent 80%), var(--p);" },
+    { name: "Studio Spotlight", css: "background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--s), transparent 60%) 0%, transparent 80%), var(--p);" },
+    { name: "Dual Mesh Glow", css: "background: radial-gradient(at 0% 0%, var(--s) 0px, transparent 50%), radial-gradient(at 100% 100%, var(--s) 0px, transparent 50%), var(--p);" },
+    { name: "Glassmorphism", css: "background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)), var(--p); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);" },
+    { name: "Velvet Soft", css: "background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--s), transparent 80%) 0%, var(--p) 100%);" },
+    { name: "Quad Corner Glow", css: "background: radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--s), transparent 50%) 0%, transparent 65%), radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--s), transparent 45%) 0%, transparent 60%), radial-gradient(circle at 0% 100%, color-mix(in srgb, var(--s), transparent 40%) 0%, transparent 70%), radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--s), transparent 45%) 0%, transparent 65%), var(--p);" },
+    { name: "Horizontal Stripes", css: "background: radial-gradient(ellipse 200% 30% at 50% 20%, color-mix(in srgb, var(--s), transparent 55%) 0%, transparent 80%), radial-gradient(ellipse 200% 30% at 50% 80%, color-mix(in srgb, var(--s), transparent 50%) 0%, transparent 75%), var(--p);" },
+    { name: "Central Orb", css: "background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--s), transparent 30%) 0%, transparent 85%), radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--s), transparent 20%) 0%, transparent 65%), var(--p);" },
+    { name: "Edge Spotlight", css: "background: radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--s), transparent 48%) 0%, transparent 75%), radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--s), transparent 52%) 0%, transparent 78%), var(--p);" },
+    { name: "Five Point Star", css: "background: radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--s), transparent 40%) 0%, transparent 70%), radial-gradient(circle at 20% 50%, color-mix(in srgb, var(--s), transparent 35%) 0%, transparent 65%), radial-gradient(circle at 80% 50%, color-mix(in srgb, var(--s), transparent 35%) 0%, transparent 65%), radial-gradient(circle at 35% 80%, color-mix(in srgb, var(--s), transparent 38%) 0%, transparent 68%), radial-gradient(circle at 65% 80%, color-mix(in srgb, var(--s), transparent 38%) 0%, transparent 68%), var(--p);" },
+    { name: "Bottom Glow", css: "background: radial-gradient(ellipse 180% 120% at 50% 100%, color-mix(in srgb, var(--s), transparent 50%) 0%, transparent 85%), var(--p);" },
+    { name: "Side Panels", css: "background: radial-gradient(ellipse 40% 200% at 0% 50%, color-mix(in srgb, var(--s), transparent 45%) 0%, transparent 75%), radial-gradient(ellipse 40% 200% at 100% 50%, color-mix(in srgb, var(--s), transparent 45%) 0%, transparent 75%), var(--p);" },
+    { name: "Six Corner", css: "background: radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--s), transparent 42%) 0%, transparent 72%), radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--s), transparent 38%) 0%, transparent 68%), radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--s), transparent 42%) 0%, transparent 72%), radial-gradient(circle at 0% 100%, color-mix(in srgb, var(--s), transparent 40%) 0%, transparent 70%), radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--s), transparent 36%) 0%, transparent 66%), radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--s), transparent 40%) 0%, transparent 70%), var(--p);" },
+    { name: "Conic Gradient", css: "background: conic-gradient(from 45deg at 50% 50%, var(--p) 0deg, color-mix(in srgb, var(--s), transparent 60%) 90deg, var(--p) 180deg, color-mix(in srgb, var(--s), transparent 60%) 270deg, var(--p) 360deg);" },
+    { name: "Vertical Cascade", css: "background: radial-gradient(ellipse 100% 40% at 50% 15%, color-mix(in srgb, var(--s), transparent 50%) 0%, transparent 80%), radial-gradient(ellipse 100% 40% at 50% 50%, color-mix(in srgb, var(--s), transparent 35%) 0%, transparent 70%), radial-gradient(ellipse 100% 40% at 50% 85%, color-mix(in srgb, var(--s), transparent 45%) 0%, transparent 75%), var(--p);" },
+    { name: "Asymmetric Glow", css: "background: radial-gradient(ellipse 160% 80% at 30% 25%, color-mix(in srgb, var(--s), transparent 48%) 0%, transparent 82%), radial-gradient(circle at 75% 70%, color-mix(in srgb, var(--s), transparent 44%) 0%, transparent 76%), var(--p);" },
+    { name: "Top Heavy", css: "background: radial-gradient(ellipse 220% 150% at 50% 10%, color-mix(in srgb, var(--s), transparent 55%) 0%, transparent 88%), radial-gradient(circle at 25% 60%, color-mix(in srgb, var(--s), transparent 32%) 0%, transparent 70%), radial-gradient(circle at 75% 60%, color-mix(in srgb, var(--s), transparent 32%) 0%, transparent 70%), var(--p);" },
+    { name: "Floating Orbs", css: "background: radial-gradient(circle at 25% 30%, color-mix(in srgb, var(--s), transparent 46%) 0%, transparent 78%), radial-gradient(circle at 75% 35%, color-mix(in srgb, var(--s), transparent 44%) 0%, transparent 76%), radial-gradient(circle at 40% 75%, color-mix(in srgb, var(--s), transparent 40%) 0%, transparent 72%), radial-gradient(circle at 85% 80%, color-mix(in srgb, var(--s), transparent 38%) 0%, transparent 70%), var(--p);" },
+    { name: "Wide Horizon", css: "background: radial-gradient(ellipse 300% 60% at 50% 60%, color-mix(in srgb, var(--s), transparent 52%) 0%, transparent 90%), var(--p);" }
+  ]);
+  
+  const handleEditPreset = (presetName: string, newCss: string) => {
+    setPresets(prev => prev.map(p => 
+      p.name === presetName ? { ...p, css: newCss } : p
+    ));
+    showToast(`Updated ${presetName}`, 'success');
+  };
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
     setToast({ msg, type });
@@ -149,23 +180,6 @@ export const BackgroundGenerator: React.FC = () => {
     return `${gradients}, ${primary}`;
   }, [lights, primary, secondary]);
 
-  const presets = [
-    { name: "Aurora Borealis", css: "background: linear-gradient(215deg, var(--p) 0%, var(--s) 100%);" },
-    { name: "Deep Space", css: "background: radial-gradient(circle at top left, var(--s), transparent 80%), var(--p);" },
-    { name: "Studio Spotlight", css: "background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--s), transparent 60%) 0%, transparent 80%), var(--p);" },
-    { name: "Dual Mesh Glow", css: "background: radial-gradient(at 0% 0%, var(--s) 0px, transparent 50%), radial-gradient(at 100% 100%, var(--s) 0px, transparent 50%), var(--p);" },
-    { name: "Glassmorphism", css: "background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)), var(--p); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);" },
-    { name: "Velvet Soft", css: "background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--s), transparent 80%) 0%, var(--p) 100%);" },
-    { name: "Triple Ambiance", css: "background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--s), transparent 50%) 0%, transparent 75%), radial-gradient(ellipse at 30% 70%, color-mix(in srgb, var(--s), transparent 40%) 0%, transparent 70%), radial-gradient(ellipse at 70% 70%, color-mix(in srgb, var(--s), transparent 40%) 0%, transparent 70%), var(--p);" },
-    { name: "Soft Spotlight Trio", css: "background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--s), transparent 45%) 0%, transparent 80%), radial-gradient(circle at 25% 75%, color-mix(in srgb, var(--s), transparent 35%) 0%, transparent 75%), radial-gradient(circle at 75% 75%, color-mix(in srgb, var(--s), transparent 35%) 0%, transparent 75%), var(--p);" },
-    { name: "Ambient Glow", css: "background: radial-gradient(ellipse 150% 100% at 50% 25%, color-mix(in srgb, var(--s), transparent 55%) 0%, transparent 85%), radial-gradient(ellipse 120% 90% at 20% 80%, color-mix(in srgb, var(--s), transparent 38%) 0%, transparent 78%), radial-gradient(ellipse 120% 90% at 80% 80%, color-mix(in srgb, var(--s), transparent 38%) 0%, transparent 78%), var(--p);" },
-    { name: "Mood Lighting", css: "background: radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--s), transparent 48%) 0%, transparent 82%), radial-gradient(circle at 28% 72%, color-mix(in srgb, var(--s), transparent 32%) 0%, transparent 73%), radial-gradient(circle at 72% 72%, color-mix(in srgb, var(--s), transparent 32%) 0%, transparent 73%), var(--p);" },
-    { name: "Diffused Luminescence", css: "background: radial-gradient(ellipse at 50% 32%, color-mix(in srgb, var(--s), transparent 52%) 0%, transparent 88%), radial-gradient(ellipse at 32% 68%, color-mix(in srgb, var(--s), transparent 36%) 0%, transparent 76%), radial-gradient(ellipse at 68% 68%, color-mix(in srgb, var(--s), transparent 36%) 0%, transparent 76%), var(--p);" },
-    { name: "Warm Haze", css: "background: radial-gradient(circle at 50% 33%, color-mix(in srgb, var(--s), transparent 46%) 0%, transparent 81%), radial-gradient(circle at 30% 77%, color-mix(in srgb, var(--s), transparent 34%) 0%, transparent 74%), radial-gradient(circle at 70% 77%, color-mix(in srgb, var(--s), transparent 34%) 0%, transparent 74%), var(--p);" },
-    { name: "Layered Illumination", css: "background: radial-gradient(ellipse 140% 110% at 50% 27%, color-mix(in srgb, var(--s), transparent 50%) 0%, transparent 86%), radial-gradient(ellipse 110% 85% at 26% 78%, color-mix(in srgb, var(--s), transparent 37%) 0%, transparent 77%), radial-gradient(ellipse 110% 85% at 74% 78%, color-mix(in srgb, var(--s), transparent 37%) 0%, transparent 77%), var(--p);" },
-    { name: "Ethereal Beams", css: "background: radial-gradient(circle at 50% 31%, color-mix(in srgb, var(--s), transparent 47%) 0%, transparent 83%), radial-gradient(circle at 27% 73%, color-mix(in srgb, var(--s), transparent 33%) 0%, transparent 75%), radial-gradient(circle at 73% 73%, color-mix(in srgb, var(--s), transparent 33%) 0%, transparent 75%), var(--p);" },
-    { name: "Subtle Radiance", css: "background: radial-gradient(ellipse at 50% 29%, color-mix(in srgb, var(--s), transparent 49%) 0%, transparent 84%), radial-gradient(ellipse at 31% 71%, color-mix(in srgb, var(--s), transparent 35%) 0%, transparent 72%), radial-gradient(ellipse at 69% 71%, color-mix(in srgb, var(--s), transparent 35%) 0%, transparent 72%), var(--p);" }
-  ];
 
   return (
     <div className="space-y-12 max-w-6xl mx-auto pb-20">
@@ -220,6 +234,8 @@ export const BackgroundGenerator: React.FC = () => {
               pColor={primary} 
               sColor={secondary} 
               useVariables={useVariables}
+              showEdit={true}
+              onEdit={handleEditPreset}
               onSave={() => showToast(`Saved ${p.name} to Cloud`)}
             />
           ))}
