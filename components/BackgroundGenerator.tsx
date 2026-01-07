@@ -142,6 +142,94 @@ export const BackgroundGenerator: React.FC = () => {
     }
   };
 
+  // Parse CSS to extract lights from radial-gradient patterns
+  const parseCssToLights = (cssString: string): LightSource[] | null => {
+    // Extract background value (remove "background:" prefix)
+    let bgValue = cssString.replace(/^background:\s*/i, '').replace(/;?\s*$/, '').trim();
+    
+    // Remove media queries if present
+    if (bgValue.includes('@media')) {
+      bgValue = bgValue.split('@media')[0].trim();
+    }
+    
+    const lights: LightSource[] = [];
+    
+    // Pattern to match radial gradients with our format: 
+    // radial-gradient(circle at X% Y%, color-mix(...transparent N%) 0%, transparent N%)
+    // More flexible pattern that handles variations
+    const patterns = [
+      // Circle pattern with color-mix
+      /radial-gradient\([^,]*circle[^,]*at\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%[^)]*transparent\s+(\d+(?:\.\d+)?)%\)\s*0%[^)]*transparent\s+(\d+(?:\.\d+)?)%\)/gi,
+      // Ellipse pattern with color-mix
+      /radial-gradient\([^,]*ellipse[^)]*at\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%[^)]*transparent\s+(\d+(?:\.\d+)?)%\)\s*0%[^)]*transparent\s+(\d+(?:\.\d+)?)%\)/gi,
+      // Simple circle pattern without color-mix
+      /radial-gradient\([^,]*circle[^,]*at\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%[^)]*transparent\s+(\d+(?:\.\d+)?)%\)/gi,
+    ];
+    
+    for (const pattern of patterns) {
+      let match;
+      pattern.lastIndex = 0; // Reset regex
+      
+      while ((match = pattern.exec(bgValue)) !== null) {
+        const posX = Math.round(parseFloat(match[1]));
+        const posY = Math.round(parseFloat(match[2]));
+        
+        if (match[3] !== undefined && match[4] !== undefined) {
+          // Pattern with both intensity and spread
+          const transparentValue = parseFloat(match[3]);
+          const intensity = Math.max(0, Math.min(100, 100 - transparentValue)); // Reverse transparency
+          const spread = Math.round(parseFloat(match[4]));
+          
+          lights.push({
+            id: `parsed-${lights.length + 1}-${Date.now()}`,
+            posX,
+            posY,
+            spread,
+            intensity
+          });
+        } else if (match[3] !== undefined) {
+          // Pattern with only spread
+          const spread = Math.round(parseFloat(match[3]));
+          lights.push({
+            id: `parsed-${lights.length + 1}-${Date.now()}`,
+            posX,
+            posY,
+            spread,
+            intensity: 60 // Default intensity
+          });
+        }
+      }
+      
+      // If we found lights with this pattern, use them
+      if (lights.length > 0) {
+        break;
+      }
+    }
+    
+    return lights.length > 0 ? lights : null;
+  };
+
+  // Handle editing a preset in visual editor
+  const handleEditPresetVisual = (presetName: string, presetCss: string) => {
+    // Try to parse CSS into lights
+    const parsedLights = parseCssToLights(presetCss);
+    
+    if (parsedLights && parsedLights.length > 0) {
+      // Successfully parsed - load into editor
+      setDesktopLights(parsedLights);
+      setMobileLights(parsedLights);
+      setLights(parsedLights);
+      setActiveTab('editor');
+      setDevice('desktop');
+      showToast(`Loaded ${presetName} into visual editor`, 'success');
+    } else {
+      // Couldn't parse - show message and still open editor with default
+      setActiveTab('editor');
+      setDevice('desktop');
+      showToast(`${presetName} uses patterns not editable with visual controls. Use manual CSS editing.`, 'error');
+    }
+  };
+
   // Generate CSS for a set of lights
   const generateLightsCss = (lightsArray: LightSource[]): string => {
     if (lightsArray.length === 0) {
@@ -235,6 +323,7 @@ export const BackgroundGenerator: React.FC = () => {
               sColor={secondary} 
               useVariables={useVariables}
               showEdit={true}
+              onEditVisual={handleEditPresetVisual}
               onEdit={handleEditPreset}
               onSave={() => showToast(`Saved ${p.name} to Cloud`)}
             />

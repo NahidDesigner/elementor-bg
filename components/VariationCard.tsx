@@ -10,10 +10,11 @@ interface Props {
   useVariables?: boolean;
   onSave?: () => void;
   onEdit?: (name: string, css: string) => void;
+  onEditVisual?: (name: string, css: string) => void;
   showEdit?: boolean;
 }
 
-export const VariationCard: React.FC<Props> = ({ name, css, pColor, sColor, useVariables, onSave, onEdit, showEdit = false }) => {
+export const VariationCard: React.FC<Props> = ({ name, css, pColor, sColor, useVariables, onSave, onEdit, onEditVisual, showEdit = false }) => {
   const [copied, setCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -197,15 +198,24 @@ export const VariationCard: React.FC<Props> = ({ name, css, pColor, sColor, useV
             >
               {copied ? '✓ Copied' : 'Copy Selector'}
             </button>
+            {showEdit && onEditVisual && (
+              <button 
+                onClick={() => onEditVisual(name, css)}
+                className="w-40 bg-yellow-500 text-white py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl transform hover:scale-105 active:scale-95 transition-all"
+              >
+                Edit in Editor
+              </button>
+            )}
             {showEdit && onEdit && (
               <button 
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setEditedCss(css);
                   setIsEditing(true);
                 }}
-                className="w-40 bg-yellow-500 text-white py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl transform hover:scale-105 active:scale-95 transition-all"
+                className="w-40 bg-slate-600 text-white py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl transform hover:scale-105 active:scale-95 transition-all"
               >
-                Edit CSS
+                Edit CSS Text
               </button>
             )}
             <button 
