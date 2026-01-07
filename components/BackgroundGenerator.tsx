@@ -142,6 +142,30 @@ export const BackgroundGenerator: React.FC = () => {
     }
   };
 
+  // Convert CSS position keywords to percentages
+  const convertPositionToPercent = (position: string): { x: number; y: number } => {
+    const normalized = position.toLowerCase().trim();
+    
+    // Keyword combinations
+    if (normalized.includes('top') && normalized.includes('left')) return { x: 0, y: 0 };
+    if (normalized.includes('top') && normalized.includes('right')) return { x: 100, y: 0 };
+    if (normalized.includes('bottom') && normalized.includes('left')) return { x: 0, y: 100 };
+    if (normalized.includes('bottom') && normalized.includes('right')) return { x: 100, y: 100 };
+    if (normalized.includes('top') && normalized.includes('center')) return { x: 50, y: 0 };
+    if (normalized.includes('bottom') && normalized.includes('center')) return { x: 50, y: 100 };
+    if (normalized.includes('left') && normalized.includes('center')) return { x: 0, y: 50 };
+    if (normalized.includes('right') && normalized.includes('center')) return { x: 100, y: 50 };
+    
+    // Single keywords
+    if (normalized === 'top') return { x: 50, y: 0 };
+    if (normalized === 'bottom') return { x: 50, y: 100 };
+    if (normalized === 'left') return { x: 0, y: 50 };
+    if (normalized === 'right') return { x: 100, y: 50 };
+    if (normalized === 'center') return { x: 50, y: 50 };
+    
+    return { x: 50, y: 50 }; // Default to center
+  };
+
   // Parse CSS to extract lights from radial-gradient patterns
   const parseCssToLights = (cssString: string): LightSource[] | null => {
     // Extract background value (remove "background:" prefix)
@@ -154,55 +178,95 @@ export const BackgroundGenerator: React.FC = () => {
     
     const lights: LightSource[] = [];
     
-    // Pattern to match radial gradients with our format: 
-    // radial-gradient(circle at X% Y%, color-mix(...transparent N%) 0%, transparent N%)
-    // More flexible pattern that handles variations
-    const patterns = [
-      // Circle pattern with color-mix
-      /radial-gradient\([^,]*circle[^,]*at\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%[^)]*transparent\s+(\d+(?:\.\d+)?)%\)\s*0%[^)]*transparent\s+(\d+(?:\.\d+)?)%\)/gi,
-      // Ellipse pattern with color-mix
-      /radial-gradient\([^,]*ellipse[^)]*at\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%[^)]*transparent\s+(\d+(?:\.\d+)?)%\)\s*0%[^)]*transparent\s+(\d+(?:\.\d+)?)%\)/gi,
-      // Simple circle pattern without color-mix
-      /radial-gradient\([^,]*circle[^,]*at\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%[^)]*transparent\s+(\d+(?:\.\d+)?)%\)/gi,
-    ];
-    
-    for (const pattern of patterns) {
-      let match;
-      pattern.lastIndex = 0; // Reset regex
+    // Extract all radial-gradient patterns (including nested ones)
+    // Match: radial-gradient(...) where ... can contain nested parentheses
+    const findRadialGradients = (str: string): string[] => {
+      const gradients: string[] = [];
+      let depth = 0;
+      let start = -1;
       
-      while ((match = pattern.exec(bgValue)) !== null) {
-        const posX = Math.round(parseFloat(match[1]));
-        const posY = Math.round(parseFloat(match[2]));
-        
-        if (match[3] !== undefined && match[4] !== undefined) {
-          // Pattern with both intensity and spread
-          const transparentValue = parseFloat(match[3]);
-          const intensity = Math.max(0, Math.min(100, 100 - transparentValue)); // Reverse transparency
-          const spread = Math.round(parseFloat(match[4]));
-          
-          lights.push({
-            id: `parsed-${lights.length + 1}-${Date.now()}`,
-            posX,
-            posY,
-            spread,
-            intensity
-          });
-        } else if (match[3] !== undefined) {
-          // Pattern with only spread
-          const spread = Math.round(parseFloat(match[3]));
-          lights.push({
-            id: `parsed-${lights.length + 1}-${Date.now()}`,
-            posX,
-            posY,
-            spread,
-            intensity: 60 // Default intensity
-          });
+      for (let i = 0; i < str.length; i++) {
+        if (str.substring(i, i + 17) === 'radial-gradient(') {
+          if (start === -1) {
+            start = i;
+            depth = 1;
+            i += 16; // Skip "radial-gradient"
+          } else {
+            depth++;
+          }
+        } else if (str[i] === '(' && start !== -1) {
+          depth++;
+        } else if (str[i] === ')' && start !== -1) {
+          depth--;
+          if (depth === 0) {
+            gradients.push(str.substring(start, i + 1));
+            start = -1;
+          }
+        }
+      }
+      return gradients;
+    };
+    
+    const gradientStrings = findRadialGradients(bgValue);
+    
+    for (const gradientContent of gradientStrings) {
+      
+      // Extract position - try percentages first, then keywords
+      let posX = 50, posY = 50; // Default
+      
+      // Try percentage positions first: "at 50% 30%"
+      const percentMatch = gradientContent.match(/at\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%/i);
+      if (percentMatch) {
+        posX = Math.round(parseFloat(percentMatch[1]));
+        posY = Math.round(parseFloat(percentMatch[2]));
+      } else {
+        // Try keyword positions: "at top left", "at center", etc.
+        const keywordMatch = gradientContent.match(/at\s+([^,)]+?)(?:\s*,|\s*\))/i);
+        if (keywordMatch) {
+          const position = convertPositionToPercent(keywordMatch[1].trim());
+          posX = position.x;
+          posY = position.y;
         }
       }
       
-      // If we found lights with this pattern, use them
-      if (lights.length > 0) {
-        break;
+      // Extract transparency/spread values
+      const transparentMatches = gradientContent.match(/transparent\s+(\d+(?:\.\d+)?)%/gi);
+      if (transparentMatches && transparentMatches.length > 0) {
+        // Get the last transparent value (usually the spread)
+        const lastTransparent = transparentMatches[transparentMatches.length - 1];
+        const spreadMatch = lastTransparent.match(/(\d+(?:\.\d+)?)/);
+        const spread = spreadMatch ? Math.round(parseFloat(spreadMatch[1])) : 80;
+        
+        // If there's color-mix, get intensity from first transparent value
+        let intensity = 60; // Default
+        if (gradientContent.includes('color-mix') && transparentMatches.length > 1) {
+          const firstTransparent = transparentMatches[0];
+          const intensityMatch = firstTransparent.match(/(\d+(?:\.\d+)?)/);
+          if (intensityMatch) {
+            const transparentValue = parseFloat(intensityMatch[1]);
+            intensity = Math.max(0, Math.min(100, 100 - transparentValue));
+          }
+        } else if (transparentMatches.length === 1) {
+          // Single transparent value - estimate intensity based on color usage
+          intensity = gradientContent.includes('var(--s)') || gradientContent.includes('var(--e-global-color-secondary)') ? 70 : 50;
+        }
+        
+        lights.push({
+          id: `parsed-${lights.length + 1}-${Date.now()}`,
+          posX,
+          posY,
+          spread,
+          intensity
+        });
+      } else if (gradientContent.includes('radial-gradient')) {
+        // Gradient exists but no transparent value - create with defaults
+        lights.push({
+          id: `parsed-${lights.length + 1}-${Date.now()}`,
+          posX,
+          posY,
+          spread: 80,
+          intensity: 60
+        });
       }
     }
     
