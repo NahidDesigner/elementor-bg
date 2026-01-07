@@ -1,5 +1,7 @@
 {
   "name": "Elementor Design Pro",
   "description": "A sophisticated tool for Elementor designers to generate modern background CSS using primary and secondary colors, featuring live previews and one-click CSS copying.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "camera"
+  ]
 }

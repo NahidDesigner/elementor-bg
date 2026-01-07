@@ -57,11 +57,14 @@ export const BackgroundGenerator: React.FC = () => {
 
   const presets = [
     { name: "Aurora Borealis", category: "Gradient", css: "background: linear-gradient(215deg, var(--p) 0%, var(--s) 100%);" },
-    { name: "Subtle Center Glow", category: "Gradient", css: "background: radial-gradient(circle at 50% 50%, var(--s) 0%, var(--p) 100%);" },
+    { name: "Deep Space", category: "Gradient", css: "background: radial-gradient(circle at top left, var(--s), transparent 80%), var(--p);" },
     { name: "Studio Spotlight", category: "Mesh", css: "background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--s), transparent 60%) 0%, transparent 80%), var(--p);" },
     { name: "Dual Mesh Glow", category: "Mesh", css: "background: radial-gradient(at 0% 0%, var(--s) 0px, transparent 50%), radial-gradient(at 100% 100%, var(--s) 0px, transparent 50%), var(--p);" },
-    { name: "Frosted Accents", category: "Glass", css: "background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent), radial-gradient(circle at 20% 20%, var(--s) 0%, transparent 40%), var(--p);" },
-    { name: "Velvet Soft", category: "Glass", css: "background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--s), transparent 80%) 0%, var(--p) 100%);" }
+    { name: "Glassmorphism", category: "Glass", css: "background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)), var(--p); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);" },
+    { name: "Velvet Soft", category: "Glass", css: "background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--s), transparent 80%) 0%, var(--p) 100%);" },
+    { name: "Sunset Horizon", category: "Gradient", css: "background: linear-gradient(to bottom, var(--p), var(--s));" },
+    { name: "Floating Orb", category: "Mesh", css: "background: radial-gradient(circle at 70% 30%, var(--s) 0%, transparent 50%), var(--p);" },
+    { name: "Cyberpunk Edge", category: "Gradient", css: "background: linear-gradient(90deg, var(--p) 0%, var(--s) 50%, var(--p) 100%);" }
   ];
 
   return (
