@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Elementor Design Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Babel is required to transform TSX in the browser without a build step -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -27,6 +30,7 @@
 </head>
 <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    <!-- Note the type="text/babel" and data-type="module" for browser-side TSX transformation -->
+    <script type="text/babel" data-type="module" src="./index.tsx"></script>
 </body>
 </html>

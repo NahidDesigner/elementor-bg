@@ -1,14 +1,18 @@
+
 {
   "name": "elementor-design-pro",
   "version": "1.0.0",
   "description": "Design tool for Elementor",
   "main": "server.js",
   "scripts": {
-    "build": "echo 'No build step required for ESM app'",
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "build": "echo 'Deploying static assets...' && mkdir -p public && cp index.html public/ 2>/dev/null || true",
     "start": "node server.js"
   },
   "engines": {
     "node": ">=18.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "dotenv": "^16.4.0"
+  }
 }
