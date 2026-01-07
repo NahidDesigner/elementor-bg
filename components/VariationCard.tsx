@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 
 interface Props {
@@ -22,13 +21,16 @@ export const VariationCard: React.FC<Props> = ({ name, css, pColor, sColor }) =>
   };
 
   const previewStyle = useMemo(() => {
+    // Process CSS variables for the preview by replacing them with the current color values
+    const processedCss = css
+      .replace(/var\(--p\)/g, pColor)
+      .replace(/var\(--s\)/g, sColor)
+      .replace('background:', '')
+      .replace(';', '')
+      .trim();
+    
     return {
-      background: css
-        .replace(/var\(--p\)/g, pColor)
-        .replace(/var\(--s\)/g, sColor)
-        .replace('background:', '')
-        .replace(';', '')
-        .trim()
+      background: processedCss
     };
   }, [css, pColor, sColor]);
 
