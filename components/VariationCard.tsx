@@ -1,78 +1,63 @@
 
 import React, { useState, useMemo } from 'react';
 
-interface VariationCardProps {
+interface Props {
   name: string;
   css: string;
-  previewPrimary: string;
-  previewSecondary: string;
+  pColor: string;
+  sColor: string;
 }
 
-export const VariationCard: React.FC<VariationCardProps> = ({ name, css, previewPrimary, previewSecondary }) => {
+export const VariationCard: React.FC<Props> = ({ name, css, pColor, sColor }) => {
   const [copied, setCopied] = useState(false);
 
+  const elementorSnippet = useMemo(() => {
+    return `selector {\n  ${css.trim()}\n}`;
+  }, [css]);
+
   const handleCopy = () => {
-    // Add selector for Elementor custom CSS convenience
-    const elementorCss = `selector {\n  ${css}\n}`;
-    navigator.clipboard.writeText(elementorCss);
+    navigator.clipboard.writeText(elementorSnippet);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Convert CSS string to React Style object and inject preview variables
   const previewStyle = useMemo(() => {
-    const styleObj: any = {
-      '--e-global-color-primary': previewPrimary,
-      '--e-global-color-secondary': previewSecondary,
+    const style: any = {
+      '--e-global-color-primary': pColor,
+      '--e-global-color-secondary': sColor,
     };
     
-    css.split(';').filter(Boolean).forEach(line => {
-      const [key, ...val] = line.split(':');
-      if (key && val.length) {
-        styleObj[key.trim()] = val.join(':').trim();
-      }
-    });
+    // Inject the background property
+    const bgMatch = css.match(/background:\s*([^;]+)/);
+    if (bgMatch) style.background = bgMatch[1];
     
-    return styleObj;
-  }, [css, previewPrimary, previewSecondary]);
+    return style;
+  }, [css, pColor, sColor]);
 
   return (
-    <div className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-slate-200">
-      <div 
-        className="h-56 w-full transition-transform group-hover:scale-105 duration-700 flex items-center justify-center"
-        style={previewStyle}
-      >
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-lg text-[10px] text-white/40 uppercase tracking-widest font-bold">
-          Preview
+    <div className="group bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-md hover:shadow-2xl transition-all duration-500">
+      <div className="h-48 w-full p-4">
+        <div className="w-full h-full rounded-[1.5rem] shadow-inner flex items-center justify-center relative overflow-hidden" style={previewStyle}>
+          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <button onClick={handleCopy} className="bg-white text-slate-900 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tighter shadow-xl transform scale-90 group-hover:scale-100 transition-all">
+              {copied ? '✓ Copied' : 'Get CSS'}
+            </button>
+          </div>
         </div>
       </div>
-      <div className="p-5 border-t border-slate-100">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="font-bold text-slate-800">{name}</h3>
-          <button 
-            onClick={handleCopy}
-            className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all ${
-              copied ? 'bg-green-500 text-white' : 'bg-slate-900 text-white hover:bg-slate-700'
-            }`}
-          >
-            {copied ? 'Copied!' : 'Copy Code'}
-          </button>
+      <div className="px-6 pb-6 space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="font-extrabold text-slate-800 text-sm tracking-tight">{name}</h3>
+          <span className="text-[10px] font-bold text-slate-400 uppercase bg-slate-50 px-2 py-1 rounded-md">Elementor Ready</span>
         </div>
-        <div className="relative group/code">
-          <div className="bg-slate-50 rounded-xl p-3 max-h-24 overflow-y-auto border border-slate-100">
-            <code className="text-[10px] text-slate-500 font-mono break-all leading-relaxed block">
-              selector {'{'}
-              <br />
-              &nbsp;&nbsp;{css}
-              <br />
-              {'}'}
-            </code>
+        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 relative group/code">
+          <code className="text-[9px] text-slate-400 font-mono block overflow-hidden text-ellipsis whitespace-nowrap">
+            {elementorSnippet.split('\n')[1].trim()}
+          </code>
+          <div className="absolute inset-0 bg-slate-900 text-white flex items-center justify-center opacity-0 group-hover/code:opacity-100 transition-opacity rounded-xl cursor-pointer" onClick={handleCopy}>
+            <span className="text-[10px] font-black uppercase tracking-widest">{copied ? 'Copied' : 'Copy All Code'}</span>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-50 to-transparent pointer-events-none opacity-40 h-8 bottom-0" />
         </div>
-        <p className="mt-3 text-[10px] text-slate-400 font-medium italic">
-          * Uses Elementor Global Color Variables
-        </p>
       </div>
     </div>
   );
