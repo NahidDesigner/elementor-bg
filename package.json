@@ -5,9 +5,8 @@
   "description": "Design tool for Elementor",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 0",
-    "build": "echo 'Deploying static assets...' && mkdir -p public && cp index.html public/ 2>/dev/null || true",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "echo 'Static ESM deployment - no build needed'"
   },
   "engines": {
     "node": ">=18.0.0"
