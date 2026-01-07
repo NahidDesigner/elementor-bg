@@ -3,13 +3,13 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-// Port should be provided by Hostinger
 const PORT = process.env.PORT || 3000;
+const API_KEY = process.env.API_KEY || '';
 
 const MIME_TYPES = {
   '.html': 'text/html',
   '.js': 'application/javascript',
-  '.tsx': 'text/plain', // Babel needs this as text to transform it
+  '.tsx': 'text/plain',
   '.ts': 'text/plain',
   '.css': 'text/css',
   '.json': 'application/json',
@@ -25,7 +25,7 @@ const server = http.createServer((req, res) => {
   let filePath = path.join(__dirname, requestPath === '/' ? 'index.html' : requestPath);
   
   const extname = String(path.extname(filePath)).toLowerCase();
-  const contentType = MIME_TYPES[extname] || 'application/octet-stream';
+  let contentType = MIME_TYPES[extname] || 'application/octet-stream';
 
   fs.readFile(filePath, (error, content) => {
     if (error) {
@@ -35,8 +35,13 @@ const server = http.createServer((req, res) => {
             res.writeHead(500);
             res.end('Critical Error: index.html missing');
           } else {
+            // Inject the API key into the index.html on the fly
+            let html = indexContent.toString();
+            const injectedScript = `<script>window.process = { env: { API_KEY: '${API_KEY}' } };</script>`;
+            html = html.replace('<head>', `<head>${injectedScript}`);
+            
             res.writeHead(200, { 'Content-Type': 'text/html' });
-            res.end(indexContent, 'utf-8');
+            res.end(html, 'utf-8');
           }
         });
       } else {
@@ -56,5 +61,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT} with API_KEY: ${API_KEY ? 'Present' : 'Missing'}`);
 });

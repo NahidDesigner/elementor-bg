@@ -38,7 +38,6 @@ export const BackgroundGenerator: React.FC = () => {
   const [savedPresets, setSavedPresets] = useState<SavedPreset[]>([]);
   const [dbStatus, setDbStatus] = useState<{status: 'checking' | 'ok' | 'error', message?: string}>({status: 'checking'});
   
-  // Custom UI notification states
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [presetNameInput, setPresetNameInput] = useState('');
@@ -145,18 +144,24 @@ export const BackgroundGenerator: React.FC = () => {
     }
   };
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const currentLights = responsiveLights[activeDevice];
-  const activeLight = currentLights.find(l => l.id === activeLightId) || currentLights[0];
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Check for API key safely from global environment or process
+    const apiKey = (window as any).process?.env?.API_KEY || (process as any).env?.API_KEY;
+    
+    if (!apiKey) {
+      showToast("API Key not configured in Hostinger", 'error');
+      return;
+    }
+
     setIsAnalyzing(true);
     const reader = new FileReader();
     reader.onload = async (event) => {
       const base64 = (event.target?.result as string).split(',')[1];
       try {
+        const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
           model: 'gemini-3-flash-preview',
           contents: {
@@ -222,9 +227,11 @@ export const BackgroundGenerator: React.FC = () => {
     { name: 'Soft Product Glow', css: `background: radial-gradient(circle at 50% 50%, color-mix(in srgb, ${S}, transparent 85%) 0%, transparent 60%), ${P};` }
   ];
 
+  const currentLights = responsiveLights[activeDevice];
+  const activeLight = currentLights.find(l => l.id === activeLightId) || currentLights[0];
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-12 relative">
-      
       {/* CUSTOM TOAST */}
       {toast && (
         <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl font-bold text-white transition-all animate-bounce ${toast.type === 'error' ? 'bg-red-600' : 'bg-indigo-600'}`}>
@@ -268,7 +275,7 @@ export const BackgroundGenerator: React.FC = () => {
       {/* DELETE MODAL */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-sm">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-sm">
             <h3 className="text-xl font-bold text-slate-900 mb-4 text-center">Delete Preset?</h3>
             <p className="text-slate-500 mb-6 text-sm text-center">This action cannot be undone. Are you sure?</p>
             <div className="flex gap-3">
