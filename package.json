@@ -1,11 +1,14 @@
-
 {
   "name": "elementor-design-pro",
   "version": "1.0.0",
   "description": "Design tool for Elementor",
   "main": "server.js",
   "scripts": {
+    "build": "echo 'No build step required for ESM app'",
     "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {}
 }
