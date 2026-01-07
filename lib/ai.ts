@@ -2,10 +2,10 @@
 import { GoogleGenAI } from "@google/genai";
 
 export const getAIClient = () => {
-  // process.env.API_KEY is injected by server.js
-  const apiKey = (window as any).process?.env?.API_KEY || (process as any).env?.API_KEY;
+  // Access the key injected by server.js into the global window object
+  const apiKey = (window as any).process?.env?.API_KEY;
   if (!apiKey) {
-    console.error("Critical: API_KEY is missing from environment.");
+    console.warn("API_KEY not found in window.process.env. Ensure server.js is injecting it.");
     return null;
   }
   return new GoogleGenAI({ apiKey });
